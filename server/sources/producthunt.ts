@@ -7,9 +7,12 @@ export default defineSource(async () => {
   if (!apiToken) {
     throw new Error("PRODUCTHUNT_API_TOKEN is not set")
   }
+  const now = new Date()
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const weekAgoStr = weekAgo.toISOString().split('T')[0]
   const query = `
     query {
-      posts(first: 30, order: VOTES) {
+      posts(first: 30, order: VOTES, where: {featuredAt: {gte: "${weekAgoStr}"}}) {
         edges {
           node {
             id
@@ -18,12 +21,14 @@ export default defineSource(async () => {
             votesCount
             url
             slug
+            thumbnail {
+              url
+            }
           }
         }
       }
     }
   `
-
   const response: any = await myFetch("https://api.producthunt.com/v2/api/graphql", {
     method: "POST",
     headers: {
@@ -33,24 +38,22 @@ export default defineSource(async () => {
     },
     body: JSON.stringify({ query }),
   })
-
   const news: NewsItem[] = []
   const posts = response?.data?.posts?.edges || []
-
   for (const edge of posts) {
     const post = edge.node
     if (post.id && post.name) {
       news.push({
-        id: post.id,
+        id: post.slug,
         title: post.name,
         url: post.url || `https://www.producthunt.com/posts/${post.slug}`,
         extra: {
           info: ` △︎ ${post.votesCount || 0}`,
           hover: post.tagline,
+          icon: post.thumbnail?.url ? proxyPicture(post.thumbnail.url) : undefined,
         },
       })
     }
   }
-
   return news
 })
