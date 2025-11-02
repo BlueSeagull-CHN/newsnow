@@ -12,7 +12,7 @@ export default defineSource(async () => {
   const weekAgoStr = weekAgo.toISOString().split('T')[0]
   const query = `
     query {
-      posts(first: 30, order: VOTES, where: {featuredAt: {gte: "${weekAgoStr}"}}) {
+      posts(first: 30, order: VOTES, where: {featured: true, launchedAt: {gte: "${weekAgoStr}"}}) {
         edges {
           node {
             id
@@ -21,8 +21,14 @@ export default defineSource(async () => {
             votesCount
             url
             slug
-            thumbnail {
-              url
+            screenshots(first: 1) {
+              edges {
+                node {
+                  normal {
+                    url
+                  }
+                }
+              }
             }
           }
         }
@@ -43,6 +49,7 @@ export default defineSource(async () => {
   for (const edge of posts) {
     const post = edge.node
     if (post.id && post.name) {
+      const thumbnailUrl = post.screenshots?.edges?.[0]?.node?.normal?.url
       news.push({
         id: post.slug,
         title: post.name,
@@ -50,7 +57,7 @@ export default defineSource(async () => {
         extra: {
           info: ` △︎ ${post.votesCount || 0}`,
           hover: post.tagline,
-          icon: post.thumbnail?.url ? proxyPicture(post.thumbnail.url) : undefined,
+          icon: thumbnailUrl ? proxyPicture(thumbnailUrl) : undefined,
         },
       })
     }
