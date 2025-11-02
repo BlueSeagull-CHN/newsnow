@@ -1,3 +1,4 @@
+// Interface for Bilibili Hot Word response
 interface WapRes {
   code: number
   exp_str: string
@@ -33,7 +34,6 @@ interface WapRes {
   timestamp: number
   total_count: number
 }
-
 // Interface for Bilibili Hot Video response
 interface HotVideoRes {
   code: number
@@ -87,11 +87,9 @@ interface HotVideoRes {
     }[]
   }
 }
-
 const hotSearch = defineSource(async () => {
   const url = "https://s.search.bilibili.com/main/hotword?limit=30"
   const res: WapRes = await myFetch(url)
-
   return res.list.map(k => ({
     id: k.keyword,
     title: k.show_name,
@@ -101,11 +99,9 @@ const hotSearch = defineSource(async () => {
     },
   }))
 })
-
 const hotVideo = defineSource(async () => {
-  const url = "https://api.bilibili.com/x/web-interface/popular"
+  const url = "https://api.bilibili.com/x/web-interface/popular?ps=50&pn=1"
   const res: HotVideoRes = await myFetch(url)
-
   return res.data.list.map(video => ({
     id: video.bvid,
     title: video.title,
@@ -118,11 +114,9 @@ const hotVideo = defineSource(async () => {
     },
   }))
 })
-
 const ranking = defineSource(async () => {
-  const url = "https://api.bilibili.com/x/web-interface/ranking/v2"
+  const url = "https://api.bilibili.com/x/web-interface/ranking/v2?rid=0"
   const res: HotVideoRes = await myFetch(url)
-
   return res.data.list.map(video => ({
     id: video.bvid,
     title: video.title,
@@ -135,14 +129,12 @@ const ranking = defineSource(async () => {
     },
   }))
 })
-
 function formatNumber(num: number): string {
   if (num >= 10000) {
     return `${Math.floor(num / 10000)}w+`
   }
   return num.toString()
 }
-
 export default defineSource({
   "bilibili": hotSearch,
   "bilibili-hot-search": hotSearch,
