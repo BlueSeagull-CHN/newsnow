@@ -3,7 +3,7 @@ interface Res {
     type: "hot_list_feed"
     style_type: "1"
     feed_specific: {
-      answer_count: number  // Changed to number for flexibility
+      answer_count: 411
     }
     target: {
       title_area: {
@@ -36,15 +36,8 @@ interface Res {
 
 export default defineSource({
   zhihu: async () => {
-    const url = "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=20&desktop=true"
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
-    const response = await fetch(url, { headers })
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const res: Res = await response.json()
+    const url = "https://www.zhihu.com/api/v3/feed/topstory/hot-list-web?limit=20&desktop=true"
+    const res: Res = await myFetch(url)
     return res.data
       .map((k) => {
         return {
